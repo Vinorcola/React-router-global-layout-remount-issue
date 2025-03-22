@@ -1,87 +1,37 @@
-# Welcome to React Router!
+# Issue: global Layout is remounting on error
 
-A modern, production-ready template for building full-stack React applications using React Router.
+## Install
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+Clone and run `npm install` in the directory.
 
-## Features
+Then, run `npm run dev` to start the server and open [http://localhost:5173](http://localhost:5173)
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+## Understand
 
-## Getting Started
+There is a `GlobalComponent` (in `app` folder) that is mounted in the root layout. This component has it's own state that should only be initialized once during the whole app life. It is displayed at the bottom of the screen.
 
-### Installation
+There is a menu with several links:
+* **Home**: the home page
+* **Other**: another page
+* **Loader eroor**: a page where an error is thrown from the loader
+* **Unknown**: an unexisting page
 
-Install the dependencies:
+## What's wanted
 
-```bash
-npm install
-```
+The ability to have a global component that is never unmounted, even on error.
 
-### Development
+## Issue
 
-Start the development server with HMR:
+When navigating from successfull pages to any page with error (or vice versa), the global layout is unmounted and remonted
+when switching between the rendering of the global `ErrorBoundary` and the global `App` components.
 
-```bash
-npm run dev
-```
+Hence, there is no way to have a global component that is never unmounted, even if an error occured.
 
-Your application will be available at `http://localhost:5173`.
+## Reproduce
 
-## Building for Production
-
-Create a production build:
-
-```bash
-npm run build
-```
-
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
-
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+1. Open [http://localhost:5173](http://localhost:5173). Check the value displayed at the bottom of the screen.
+1. Open dev console (There is an Hydration error that can be ignored, it is due to randomness of the `GlobalComponent`'s state.)
+1. Navigate from **Home** to **Other** and vice-versa. The content of the `GlobalComponent` does not change.
+1. Navigate to either **Loader error** or **Unknown** and you'llfind that the content of `GlobalComponent` has changed since it as been unmounted and remounted (check console for proof).
+1. From ther, navigating to **Loader error** & **Unknown** pages does not affect the state.
+1. Navigate then to **Home** or **Other**, the state changes again.
